@@ -3,26 +3,26 @@ import { useBoardStore } from "../store/useBoardStore";
 import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
-  const [email, setEmail] = useState("");
-  const login = useBoardStore((state) => state.login);
+  const [userIdentifier, setUserIdentifier] = useState("");
+  const authorizeUser = useBoardStore((state) => state.authorizeUser);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const performLogin = async (e) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!userIdentifier.trim()) return;
 
-    setLoading(true);
-    // Simulate a small delay for effect
+    setIsSubmitting(true);
+
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    login(email);
+    authorizeUser(userIdentifier);
     navigate("/board");
   };
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={performLogin}
       className="flex flex-col gap-5 w-full max-w-sm relative z-10"
     >
       <div className="flex flex-col gap-2">
@@ -39,8 +39,8 @@ const LoginForm = () => {
           <input
             type="email"
             id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={userIdentifier}
+            onChange={(e) => setUserIdentifier(e.target.value)}
             placeholder="name@example.com"
             required
             className="w-full pl-10 pr-4 py-3 rounded-xl bg-black/20 border border-white/10 text-white placeholder-gray-500 focus:bg-black/40 focus:border-blue-500 focus:outline-none transition-all duration-300"
@@ -50,13 +50,13 @@ const LoginForm = () => {
 
       <button
         type="submit"
-        disabled={loading}
+        disabled={isSubmitting}
         className="relative overflow-hidden group w-full py-3.5 rounded-xl font-semibold text-white shadow-lg transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-wait"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 transition-all duration-300 group-hover:scale-105"></div>
         <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         <span className="relative flex items-center justify-center gap-2">
-          {loading ? (
+          {isSubmitting ? (
             <>
               <i className="ri-loader-4-line animate-spin text-xl"></i>
               <span>Entering...</span>

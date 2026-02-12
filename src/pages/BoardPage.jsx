@@ -4,16 +4,16 @@ import { useBoardStore } from "../store/useBoardStore";
 import Board from "../components/Board";
 
 const BoardPage = () => {
-  const user = useBoardStore((state) => state.user);
+  const sessionUser = useBoardStore((state) => state.sessionUser);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
+    if (!sessionUser) {
       navigate("/");
     }
-  }, [user, navigate]);
+  }, [sessionUser, navigate]);
 
-  if (!user) return null;
+  if (!sessionUser) return null;
 
   return <Board />;
 };

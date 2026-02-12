@@ -7,27 +7,33 @@ const FAILURE_RATE = 0.2;
 const delay = () => {
   const ms =
     Math.floor(Math.random() * (DELAY_MAX - DELAY_MIN + 1)) + DELAY_MIN;
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((res) => setTimeout(res, ms));
 };
 
 const shouldFail = () => Math.random() < FAILURE_RATE;
 
 export const mockApi = {
-  createTask: async (task) => {
+  createEntry: async (payload) => {
     await delay();
-    if (shouldFail()) throw new Error("Failed to create task");
-    return { ...task, id: task.id || uuidv4() };
+    if (shouldFail()) throw new Error("Failed to create entry");
+    return { ...payload, id: payload.id || uuidv4() };
   },
 
-  moveTask: async (taskId, newColumnId) => {
+  shiftEntry: async (entryId, newColId) => {
     await delay();
-    if (shouldFail()) throw new Error("Failed to move task");
-    return { taskId, newColumnId };
+    if (shouldFail()) throw new Error("Failed to move entry");
+    return { entryId, newColId };
   },
 
-  deleteTask: async (taskId) => {
+  removeEntry: async (entryId) => {
     await delay();
-    if (shouldFail()) throw new Error("Failed to delete task");
-    return taskId;
+    if (shouldFail()) throw new Error("Failed to delete entry");
+    return entryId;
+  },
+
+  updateEntry: async (entryId, updates) => {
+    await delay();
+    if (shouldFail()) throw new Error("Failed to update entry");
+    return { entryId, ...updates };
   },
 };

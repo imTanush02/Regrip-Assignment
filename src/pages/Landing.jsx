@@ -4,18 +4,17 @@ import { useBoardStore } from "../store/useBoardStore";
 import { useNavigate } from "react-router-dom";
 
 const Landing = () => {
-  const user = useBoardStore((state) => state.user);
+  const sessionUser = useBoardStore((state) => state.sessionUser);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    if (sessionUser) {
       navigate("/board");
     }
-  }, [user, navigate]);
+  }, [sessionUser, navigate]);
 
- return (
+  return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] relative overflow-hidden">
-      {/* Better Ambient Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-600/10 rounded-full blur-[120px]"></div>
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-indigo-900/10 rounded-full blur-[100px]"></div>
 
@@ -28,10 +27,13 @@ const Landing = () => {
         </div>
 
         <h1 className="text-5xl font-extrabold text-white mb-4 tracking-tighter">
-          Kanban<span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">Flow</span>
+          Kanban
+          <span className="bg-gradient-to-r from-blue-400 to-indigo-500 bg-clip-text text-transparent">
+            Flow
+          </span>
         </h1>
         <p className="text-gray-400 mb-10 text-center text-lg font-light leading-relaxed">
-          Streamline your workflow with <br/> minimalist precision.
+          Streamline your workflow with <br /> minimalist precision.
         </p>
 
         <LoginForm />

@@ -3,107 +3,123 @@ import { mockApi } from "../api/mockApi";
 import { v4 as uuidv4 } from "uuid";
 
 export const useBoardStore = create((set, get) => ({
-  user: localStorage.getItem("user") || null,
-  tasks: [],
-  columns: [
+  sessionUser: localStorage.getItem("user") || null,
+  boardItems: [],
+  boardColumns: [
     { id: "todo", title: "To Do" },
     { id: "inprogress", title: "In Progress" },
     { id: "done", title: "Done" },
   ],
-  toasts: [], // { id, message, type }
+  notifications: [],
 
-  // Auth Actions
-  login: (username) => {
+  authorizeUser: (username) => {
     localStorage.setItem("user", username);
-    set({ user: username });
+    set({ sessionUser: username });
   },
-  logout: () => {
+  revokeUser: () => {
     localStorage.removeItem("user");
-    set({ user: null });
+    set({ sessionUser: null });
   },
 
-  // Toast Actions
-  addToast: (message, type = "info") => {
+  showNotification: (message, type = "info") => {
     const id = uuidv4();
-    set((state) => ({ toasts: [...state.toasts, { id, message, type }] }));
+    set((state) => ({
+      notifications: [...state.notifications, { id, message, type }],
+    }));
     setTimeout(() => {
-      set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }));
-    }, 3000); // Auto dismiss
+      set((state) => ({
+        notifications: state.notifications.filter((t) => t.id !== id),
+      }));
+    }, 3000);
   },
 
-  // Board Actions with Optimistic UI
-  addTask: async (title) => {
+  createItem: async (title) => {
     const tempId = uuidv4();
-    const newTask = { id: tempId, title, columnId: "todo", owner: get().user };
+    const newItem = {
+      id: tempId,
+      title,
+      columnId: "todo",
+      owner: get().sessionUser,
+    };
 
-    // 1. Snapshot
-    const previousTasks = get().tasks;
+    const previousItems = get().boardItems;
 
-    // 2. Optimistic Update
-    set((state) => ({ tasks: [...state.tasks, newTask] }));
+    set((state) => ({ boardItems: [...state.boardItems, newItem] }));
 
     try {
-      // 3. API Call
-      const createdTask = await mockApi.createTask({
+      const createdEntry = await mockApi.createEntry({
         title,
         columnId: "todo",
-        owner: get().user,
+        owner: get().sessionUser,
       });
 
-      // 4. Sync ID if needed (Mock API returns object with ID)
       set((state) => ({
-        tasks: state.tasks.map((t) => (t.id === tempId ? createdTask : t)),
+        boardItems: state.boardItems.map((t) =>
+          t.id === tempId ? createdEntry : t,
+        ),
       }));
     } catch (error) {
-      console.error("Add Task Failed:", error);
-      // 5. Rollback
-      set({ tasks: previousTasks });
-      // 6. Error Notification
-      get().addToast("Failed to add task. Rolling back.", "error");
+      console.error("Create Item Failed:", error);
+
+      set({ boardItems: previousItems });
+
+      get().showNotification("Failed to add item. Rolling back.", "error");
     }
   },
 
-  moveTask: async (taskId, newColumnId) => {
-    // 1. Snapshot
-    const previousTasks = get().tasks;
+  moveItem: async (itemId, newColumnId) => {
+    const previousItems = get().boardItems;
 
-    // 2. Optimistic Update
     set((state) => ({
-      tasks: state.tasks.map((t) =>
-        t.id === taskId ? { ...t, columnId: newColumnId } : t,
+      boardItems: state.boardItems.map((t) =>
+        t.id === itemId ? { ...t, columnId: newColumnId } : t,
       ),
     }));
 
     try {
-      // 3. API Call
-      await mockApi.moveTask(taskId, newColumnId);
+      await mockApi.shiftEntry(itemId, newColumnId);
     } catch (error) {
-      console.error("Move Task Failed:", error);
-      // 5. Rollback
-      set({ tasks: previousTasks });
-      // 6. Error Notification
-      get().addToast("Failed to move task. Rolling back.", "error");
+      console.error("Move Item Failed:", error);
+
+      set({ boardItems: previousItems });
+
+      get().showNotification("Failed to move item. Rolling back.", "error");
     }
   },
 
-  deleteTask: async (taskId) => {
-    // 1. Snapshot
-    const previousTasks = get().tasks;
+  removeItem: async (itemId) => {
+    const previousItems = get().boardItems;
 
-    // 2. Optimistic Update
     set((state) => ({
-      tasks: state.tasks.filter((t) => t.id !== taskId),
+      boardItems: state.boardItems.filter((t) => t.id !== itemId),
     }));
 
     try {
-      // 3. API Call
-      await mockApi.deleteTask(taskId);
+      await mockApi.removeEntry(itemId);
     } catch (error) {
-      console.error("Delete Task Failed:", error);
-      // 5. Rollback
-      set({ tasks: previousTasks });
-      // 6. Error Notification
-      get().addToast("Failed to delete task. Rolling back.", "error");
+      console.error("Delete Item Failed:", error);
+
+      set({ boardItems: previousItems });
+
+      get().showNotification("Failed to delete item. Rolling back.", "error");
+    }
+  },
+
+  updateItem: async (itemId, title) => {
+    const previousItems = get().boardItems;
+
+    set((state) => ({
+      boardItems: state.boardItems.map((t) =>
+        t.id === itemId ? { ...t, title } : t,
+      ),
+    }));
+
+    try {
+      await mockApi.updateEntry(itemId, { title });
+    } catch (error) {
+      console.error("Update Item Failed:", error);
+      set({ boardItems: previousItems });
+      get().showNotification("Failed to update item. Rolling back.", "error");
     }
   },
 }));

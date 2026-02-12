@@ -3,7 +3,7 @@ import { useDroppable } from "@dnd-kit/core";
 import TaskCard from "./TaskCard";
 import clsx from "clsx";
 
-const Column = ({ column, tasks }) => {
+const Column = ({ column, items }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
   });
@@ -25,7 +25,7 @@ const Column = ({ column, tasks }) => {
           {column.title}
         </h2>
         <span className="bg-white/5 border border-white/5 text-gray-400 text-xs px-2.5 py-1 rounded-full font-medium ml-auto">
-          {tasks.length}
+          {items.length}
         </span>
       </div>
 
@@ -38,11 +38,11 @@ const Column = ({ column, tasks }) => {
             : "bg-transparent",
         )}
       >
-        {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+        {items.map((task) => (
+          <TaskCard key={task.id} item={task} />
         ))}
 
-        {tasks.length === 0 && (
+        {items.length === 0 && (
           <div
             className={clsx(
               "flex flex-col items-center justify-center p-8 text-gray-600 border-2 border-dashed border-white/5 rounded-xl h-32 transition-colors",
