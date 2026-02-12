@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Landing from "./pages/Landing";
 import BoardPage from "./pages/BoardPage";
-import Toast from "./components/Toast";
+import Toast from "./components/Notification";
 
 function App() {
   return (

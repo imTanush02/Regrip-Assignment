@@ -1,7 +1,8 @@
+// Tanush Singh (12-2-2026)
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBoardStore } from "../store/useBoardStore";
-import Board from "../components/Board";
+import Board from "../components/TaskBoard";
 
 const BoardPage = () => {
   const sessionUser = useBoardStore((state) => state.sessionUser);
